@@ -121,6 +121,12 @@ bin/console app:read:create
 _This command will create three different collections: detail-view, notified, overview. Each serving its own purpose
 in either displaying a view, or keeping track of send notification_
 
+### Start the consumers
+- In order to handle all the events, commands and projectors, we need to start our workers to consume messages from the queue
+```shell
+bin/console messenger:consume async -vv
+```
+
 ### The ApiPlatform documentation page
 Since the application uses ApiPlatform, you can now navigate to the [documentation page](https://api.todolist.test/api).
 You can also visit the [RabbitMQ dashboard](http://todolist.test:15672/). If you were to need some information regarding

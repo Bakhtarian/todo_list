@@ -1,6 +1,6 @@
 App\Domain\TodoList\TodoList:
     id:
-        description: 'Identifier of the User object'
+        description: 'Identifier of the Todo List object'
         readable: true
         writable: false
         required: true
