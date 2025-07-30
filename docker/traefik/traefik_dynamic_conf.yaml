@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /traefik/ssl/_wildcard.todolist.test.pem
+      keyFile: /traefik/ssl/_wildcard.todolist.test-key.pem

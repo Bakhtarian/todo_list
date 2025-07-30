@@ -1,0 +1,140 @@
+services:
+  todo-traefik:
+    image: "traefik:v3.3"
+    restart: always
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=todo-list"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.filename=/traefik_dynamic_conf.yaml"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - target: 8080
+        published: 8080
+      - target: 80
+        published: 80
+      - target: 443
+        published: 443
+    volumes:
+      - ${PWD}/docker/traefik/cert/:/traefik/ssl/
+      - ${PWD}/docker/traefik/traefik_dynamic_conf.yaml:/etc/traefik/dynamic/traefik_dynamic_conf.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - todo-list
+
+  todolist_nginx:
+    build: docker/nginx
+    restart: on-failure
+    volumes:
+      - ${PWD}/:/todo_list
+    depends_on:
+      - todolist_php
+    networks:
+      - todo-list
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.todo_list_cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
+      - "traefik.http.middlewares.todo_list_cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.todo_list_cors.headers.accesscontrolalloworiginlist=https://www.todolist.test,https://todolist.test"
+      - "traefik.http.middlewares.todo_list_cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.todo_list_cors.headers.addvaryheader=true"
+      - "traefik.http.routers.todo_list_api.rule=Host(`api.todolist.test`)"
+      - "traefik.http.routers.todo_list_api.entrypoints=websecure"
+      - "traefik.http.routers.todo_list_api.tls=true"
+      - "traefik.http.routers.todo_list_api.middlewares=todo_list_cors"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  todolist_php:
+    build: docker/php
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/:/todo_list:delegated
+      - ${PWD}/docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+    depends_on:
+      - todolist_db
+      - todolist_mongodb
+      - todolist_rabbit_mq
+    networks:
+      - todo-list
+
+  todolist_db:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      PGUSER: todoList
+      POSTGRES_USER: todoList
+      POSTGRES_DB: todoList
+      POSTGRES_PASSWORD: todoList123!
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - type: volume
+        source: todo_list-postgres-data
+        target: /var/lib/postgresql/data
+    networks:
+      - todo-list
+
+  todolist_mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mongoPass
+    ports:
+      - "27017:27017"
+    volumes:
+      - type: volume
+        source: todo_list-mongodb
+        target: /data/db
+    networks:
+      - todo-list
+
+  todolist_rabbit_mq:
+    image: rabbitmq:latest
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: todo
+      RABBITMQ_DEFAULT_PASS: list
+    configs:
+      - source: rabbitmq-plugins
+        target: /etc/rabbitmq/enabled_plugins
+    volumes:
+      - type: volume
+        source: rabbitmq-lib
+        target: /var/lib/rabbitmq
+      - type: volume
+        source: rabbitmq-log
+        target: /var/log/rabbitmq
+    networks:
+      - todo-list
+
+configs:
+  rabbitmq-plugins:
+    content: "[rabbitmq_management]."
+
+networks:
+  todo-list:
+    name: todo_proxy
+    attachable: true
+
+volumes:
+  todo_list-postgres-data:
+  todo_list-mongodb:
+  rabbitmq-lib:
+  rabbitmq-log:

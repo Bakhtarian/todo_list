@@ -1,0 +1,10 @@
+App\Domain\TodoList\TodoList:
+    id:
+        description: 'Identifier of the User object'
+        readable: true
+        writable: false
+        required: true
+        identifier: true
+        openapiContext:
+            type: string
+            format: uuid

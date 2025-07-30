@@ -1,0 +1,33 @@
+framework:
+    messenger:
+        default_bus: command.bus
+
+        buses:
+            command.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+            query.bus: ~
+            event.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+            projector.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+
+        transports:
+            async: "%env(MESSENGER_TRANSPORT_DSN)%"
+            sync: 'sync://'
+
+        routing:
+            App\Domain\Shared\Query\QueryInterface: sync
+            App\Domain\Shared\Event\EventInterface: async
+            App\Domain\Shared\Command\CommandInterface: async
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async: 'in-memory://'

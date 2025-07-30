@@ -1,0 +1,36 @@
+api_platform:
+    title: Todo List
+    description: Mini app to practise CQRS/ES
+    enable_entrypoint: '%kernel.debug%'
+    use_symfony_listeners: true
+    mapping:
+        paths: [ '%kernel.project_dir%/config/api_platform' ]
+    show_webby: false
+    formats:
+        json: [ 'application/json' ]
+        jsonld: [ 'application/ld+json' ]
+
+    patch_formats:
+        json: [ 'application/merge-patch+json' ]
+    version: 1.0.0
+    defaults:
+        normalization_context:
+            skip_null_values: false
+        pagination_items_per_page: 30
+        pagination_client_items_per_page: true
+        #    pagination_maximum_items_per_page: 100
+        collection:
+            pagination:
+                items_per_page_parameter_name: itemsPerPage
+        extra_properties:
+            rfc_7807_compliant_errors: false
+            standard_put: true
+
+    enable_swagger_ui: false
+    enable_re_doc: true
+    serializer:
+        hydra_prefix: true
+    doctrine:
+        enabled: true
+#    doctrine_mongodb_odm:
+#        enabled: false

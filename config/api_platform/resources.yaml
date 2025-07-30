@@ -1,0 +1,29 @@
+resources:
+    App\Domain\TodoList\TodoList:
+        shortName: 'Todo List'
+        description: 'Project to practise CQRS/ES'
+        types: [ 'https://schema.org/TodoList' ]
+        paginationItemsPerPage: 25
+        output: App\UI\Http\Rest\ApiPlatform\Output\TodoList
+        provider: App\UI\Http\Rest\ApiPlatform\Provider\TodoListProvider
+        operations:
+            ApiPlatform\Metadata\Post:
+                uriTemplate: 'todo-lists'
+                messenger: 'input'
+                status: 202
+                openapi:
+                    description: 'Create a nwe Todo List.'
+                    summary: 'Create a list, just with the title.'
+                input: App\UI\Http\Rest\ApiPlatform\Input\TodoListCreationInput
+                processor: App\UI\Http\Rest\ApiPlatform\Processor\CreateNewListProcessor
+                output: App\UI\Http\Rest\ApiPlatform\Output\TodoListIdentifier
+            ApiPlatform\Metadata\Patch:
+                uriTemplate: 'todo-lists/{id}/description'
+                messenger: 'input'
+                status: 202
+                openapi:
+                    description: 'Set the description of a Todo List'
+                    summary: 'Set the description to give addition information regarding a Todo list'
+                input: App\UI\Http\Rest\ApiPlatform\Input\SetDescriptionForListInput
+                processor: App\UI\Http\Rest\ApiPlatform\Processor\SetDescriptionOfListProcessor
+                output: App\UI\Http\Rest\ApiPlatform\Output\TodoListIdentifier
