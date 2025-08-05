@@ -9,48 +9,48 @@ use App\Domain\Shared\Exception\DateTimeException;
 use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
 use App\Domain\Shared\ValueObject\DateTime;
-use App\Domain\TodoList\ValueObject\Title;
+use App\Domain\TodoList\ValueObject\Description;
 
 /**
- * @phpstan-type TodoListWithTitleWasCreatedData array{
+ * @phpstan-type descriptionWasSetData array{
  *     id: non-empty-string,
- *     title: non-empty-string,
- *     createdAt: string,
+ *     description: non-empty-string,
+ *      updatedAt: non-empty-string,
  * }
  */
-final readonly class TodoListWithTitleWasCreated implements EventInterface
+final readonly class DescriptionForToDoListWasAdded implements EventInterface
 {
     public function __construct(
         public AggregateRootId $aggregateRootId,
-        public Title $title,
-        public DateTime $createdAt,
+        public Description $description,
+        public DateTime $updatedAt,
     ) {
     }
 
     /**
-     * @phpstan-return TodoListWithTitleWasCreatedData
+     * @return descriptionWasSetData
      */
     public function serialize(): array
     {
         return [
             'id' => $this->aggregateRootId->toString(),
-            'title' => $this->title->toString(),
-            'createdAt' => $this->createdAt->toString(),
+            'description' => $this->description->toString(),
+            'updatedAt' => $this->updatedAt->toString(),
         ];
     }
 
     /**
-     * @phpstan-param TodoListWithTitleWasCreatedData $data
+     * @phpstan-param descriptionWasSetData $data
      *
-     * @throws DateTimeException
      * @throws ValueObjectDidNotMeetValidationException
+     * @throws DateTimeException
      */
-    public static function deserialize(array $data): TodoListWithTitleWasCreated
+    public static function deserialize(array $data): DescriptionForToDoListWasAdded
     {
         return new self(
             aggregateRootId: AggregateRootId::fromString(value: $data['id']),
-            title: Title::create(value: $data['title']),
-            createdAt: DateTime::fromString(dateTime: $data['createdAt']),
+            description: Description::fromString(value: $data['description']),
+            updatedAt: DateTime::fromString(dateTime: $data['updatedAt']),
         );
     }
 
