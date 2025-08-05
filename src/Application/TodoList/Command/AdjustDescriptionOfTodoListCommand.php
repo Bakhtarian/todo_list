@@ -6,13 +6,13 @@ namespace App\Application\TodoList\Command;
 
 use App\Domain\Shared\Command\CommandInterface;
 use App\Domain\Shared\ValueObject\AggregateRootId;
-use App\Domain\TodoList\ValueObject\Title;
+use App\Domain\TodoList\ValueObject\Description;
 
-final readonly class CreateTodoListWithTitleCommand implements CommandInterface
+final readonly class AdjustDescriptionOfTodoListCommand implements CommandInterface
 {
     public function __construct(
         public AggregateRootId $aggregateRootId,
-        public Title $title,
+        public Description $description,
     ) {
     }
 }
