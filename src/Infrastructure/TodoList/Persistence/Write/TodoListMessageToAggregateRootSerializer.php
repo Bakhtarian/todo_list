@@ -9,14 +9,12 @@ use App\Domain\Shared\Exception\DateTimeException;
 use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
 use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
 use App\Domain\Shared\Exception\MissingMethodToApplyEventException;
-use App\Domain\Shared\Message\Message;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\Message\MessageInterface;
 use App\Domain\Shared\Message\MessageSerializer;
 use App\Domain\Shared\Message\MessageSerializerInterface;
 use App\Domain\Shared\Message\MessageStream;
 use App\Domain\Shared\Message\MessageToAggregateRootSerializerInterface;
-use App\Domain\Shared\ValueObject\AggregateRootId;
-use App\Domain\Shared\ValueObject\DateTime;
 use App\Domain\TodoList\TodoList;
 
 /**
@@ -53,6 +51,7 @@ final readonly class TodoListMessageToAggregateRootSerializer implements Message
      * @throws InvalidAggregateStringProvidedException
      * @throws InvalidUuidStringProvidedException
      * @throws MissingMethodToApplyEventException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function deserialize(array $data): TodoList
     {

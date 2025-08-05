@@ -4,7 +4,7 @@ namespace App\Domain\Shared\Query;
 
 /**
  * @template Q of QueryInterface
- * @template T of object
+ * @template T of object|null
  */
 interface QueryBusInterface
 {

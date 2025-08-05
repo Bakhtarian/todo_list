@@ -8,7 +8,9 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Application\TodoList\Command\CreateTodoListWithTitleCommand;
 use App\Domain\Shared\Command\CommandBusInterface;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
+use App\Domain\TodoList\ValueObject\Title;
 use App\UI\Http\Rest\ApiPlatform\Input\TodoListCreationInput;
 use App\UI\Http\Rest\ApiPlatform\Output\TodoListIdentifier;
 
@@ -22,6 +24,9 @@ final readonly class CreateNewListProcessor implements ProcessorInterface
     ) {
     }
 
+    /**
+     * @throws ValueObjectDidNotMeetValidationException
+     */
     public function process(
         mixed $data,
         Operation $operation,
@@ -32,8 +37,8 @@ final readonly class CreateNewListProcessor implements ProcessorInterface
 
         $this->commandBus->dispatch(
             command: new CreateTodoListWithTitleCommand(
-                id: $aggregateRoot,
-                title: $data->title,
+                aggregateRootId: $aggregateRoot,
+                title: Title::create(value: $data->title),
             )
         );
 

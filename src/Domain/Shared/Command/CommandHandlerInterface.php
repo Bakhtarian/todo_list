@@ -7,15 +7,11 @@ use App\Domain\Shared\Exception\DateTimeException;
 use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
 use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
 use App\Domain\Shared\Exception\MissingMethodToApplyEventException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 
-/**
- * @template T of CommandInterface
- */
 interface CommandHandlerInterface
 {
     /**
-     * @phpstan-param T $command
-     *
      * @throws InvalidAggregateStringProvidedException
      * @throws InvalidUuidStringProvidedException
      * @throws InvalidAggregateStringProvidedException
@@ -23,6 +19,9 @@ interface CommandHandlerInterface
      * @throws MissingMethodToApplyEventException
      * @throws InvalidUuidStringProvidedException
      * @throws DateTimeException
+     * @throws DateTimeException
+     * @throws MissingMethodToApplyEventException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function handle(CommandInterface $command): void
     ;

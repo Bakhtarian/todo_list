@@ -7,8 +7,6 @@ namespace App\Domain\Shared\Replay;
 use App\Domain\Shared\Aggregate\AggregateRootInterface;
 use App\Domain\Shared\Event\EventBusInterface;
 use App\Domain\Shared\Event\EventCriteriaInterface;
-use App\Domain\Shared\Event\EventInterface;
-use App\Domain\Shared\Message\MessageInterface;
 use App\Domain\Shared\Persistence\Write\EventStoreInterface;
 
 /**

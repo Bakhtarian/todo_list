@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Shared\Command;
 
 use App\Domain\Shared\Event\EventCriteria;
-use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
-use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
 use App\Infrastructure\TodoList\Replay\ReplayTodoListAggregate;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -133,7 +132,6 @@ final class ReplayTodoListEventsCommand extends Command
             }
         }
 
-
         if (null !== $input->getOption('ignoreMultipleAggregateIds')) {
             $forAggregateIdsToIgnore = array_merge(
                 $forAggregateIdsToIgnore,
@@ -221,7 +219,6 @@ final class ReplayTodoListEventsCommand extends Command
             if ($aggregate instanceof AggregateRootId) {
                 $aggregates[] = $aggregate;
             }
-
         } while ($aggregate instanceof AggregateRootId);
 
         return $aggregates;
@@ -236,12 +233,12 @@ final class ReplayTodoListEventsCommand extends Command
         $providedAggregateId = null;
 
         if ($input->hasOption('forAggregateId')) {
-            /** @var string $providedAggregateId */
+            /** @var non-empty-string $providedAggregateId */
             $providedAggregateId = $input->getOption('forAggregateId');
         }
 
         if ($input->hasOption('ignoreAggregateId')) {
-            /** @var string $providedAggregateId */
+            /** @var non-empty-string $providedAggregateId */
             $providedAggregateId = $input->getOption('ignoreAggregateId');
         }
 
@@ -254,6 +251,9 @@ final class ReplayTodoListEventsCommand extends Command
         );
     }
 
+    /**
+     * @phpstan-param non-empty-string|null $providedInput
+     */
     private function getAggregateIdFromInput(
         InputInterface $input,
         OutputInterface $output,
@@ -286,7 +286,7 @@ final class ReplayTodoListEventsCommand extends Command
             $aggregateRootIdToCheckQuestion = new Question(question: $aggregateCheckQuestion);
             $aggregateRootIdToCheckQuestion->setTrimmable(trimmable: false);
 
-            /** @var string $aggregateRootIdToCheckAnswer */
+            /** @var non-empty-string $aggregateRootIdToCheckAnswer */
             $aggregateRootIdToCheckAnswer = $helper->ask($input, $output, $aggregateRootIdToCheckQuestion);
 
             if (empty($aggregateRootIdToCheckAnswer)) {
@@ -311,6 +311,9 @@ final class ReplayTodoListEventsCommand extends Command
         return null;
     }
 
+    /**
+     * @param non-empty-string $aggregateId
+     */
     private function checkAggregateId(
         string $aggregateId,
         InputInterface $input,
@@ -319,8 +322,8 @@ final class ReplayTodoListEventsCommand extends Command
         ConfirmationQuestion $wantToContinueQuestion,
     ): AggregateRootId|bool {
         try {
-            return AggregateRootId::fromString(uuid: $aggregateId);
-        } catch (InvalidUuidStringProvidedException|InvalidAggregateStringProvidedException $e) {
+            return AggregateRootId::fromString(value: $aggregateId);
+        } catch (ValueObjectDidNotMeetValidationException $e) {
             $output->writeln(messages: sprintf('<error>%s</error>', $e->getMessage()));
         }
 

@@ -4,7 +4,7 @@ namespace App\Domain\Shared\Query;
 
 /**
  * @template Q of QueryInterface
- * @template T of object
+ * @template T of object|null
  */
 interface QueryHandlerInterface
 {
@@ -13,5 +13,5 @@ interface QueryHandlerInterface
      *
      * @phpstan-return T
      */
-    public function __invoke(QueryInterface $query): object;
+    public function __invoke(QueryInterface $query): ?object;
 }

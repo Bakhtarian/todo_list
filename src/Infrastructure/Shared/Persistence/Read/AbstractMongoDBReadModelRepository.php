@@ -69,6 +69,8 @@ abstract readonly class AbstractMongoDBReadModelRepository implements ReadModelR
     }
 
     /**
+     * @return T
+     *
      * @throws TooManyResultsException
      */
     public function find(string $id): ?IdentifiableInterface

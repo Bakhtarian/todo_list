@@ -2,6 +2,7 @@
 
 namespace App\Domain\Shared\Persistence;
 
+use App\Domain\Shared\Exception\TooManyResultsException;
 use App\Domain\Shared\IdentifiableInterface;
 
 /**
@@ -21,6 +22,8 @@ interface ReadModelRepositoryInterface
 
     /**
      * @phpstan-return T|null
+     *
+     * @throws TooManyResultsException
      */
     public function find(string $id): ?IdentifiableInterface;
 

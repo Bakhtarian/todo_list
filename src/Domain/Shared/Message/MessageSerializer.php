@@ -6,14 +6,13 @@ namespace App\Domain\Shared\Message;
 
 use App\Domain\Shared\Event\EventInterface;
 use App\Domain\Shared\Exception\DateTimeException;
-use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
-use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
 use App\Domain\Shared\ValueObject\DateTime;
 
 /**
  * @phpstan-type serializedData array{
- *        uuid: string,
+ *        uuid: non-empty-string,
  *        playhead: int,
  *        payload: non-empty-string,
  *        meta_data: non-empty-string,
@@ -57,8 +56,7 @@ final readonly class MessageSerializer implements MessageSerializerInterface
      * @return Message
      *
      * @throws DateTimeException
-     * @throws InvalidAggregateStringProvidedException
-     * @throws InvalidUuidStringProvidedException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function deserialize(array $data): MessageInterface
     {
@@ -79,7 +77,7 @@ final readonly class MessageSerializer implements MessageSerializerInterface
         $payload = $eventType::deserialize(data: $decodedPayload);
 
         return new Message(
-            aggregateRootId: AggregateRootId::fromString($data['uuid']),
+            aggregateRootId: AggregateRootId::fromString(value: $data['uuid']),
             playhead: $data['playhead'],
             metaData: $decodedMetaData,
             payload: $payload,

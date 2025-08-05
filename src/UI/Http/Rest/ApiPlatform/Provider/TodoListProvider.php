@@ -7,13 +7,11 @@ namespace App\UI\Http\Rest\ApiPlatform\Provider;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Domain\Shared\Exception\CouldNotFindReadModelException;
-use App\Domain\Shared\Exception\DateTimeException;
-use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
-use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
 use App\Domain\Shared\Exception\TooManyResultsException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
-use App\Infrastructure\TodoList\Persistence\Read\Overview\DetailView;
-use App\Infrastructure\TodoList\Persistence\Read\Overview\DetailViewRepository;
+use App\Infrastructure\TodoList\Persistence\Read\DetailView\DetailView;
+use App\Infrastructure\TodoList\Persistence\Read\DetailView\DetailViewRepository;
 use App\UI\Http\Rest\ApiPlatform\Exception\MissingDataException;
 use App\UI\Http\Rest\ApiPlatform\Output\TodoList;
 
@@ -27,12 +25,12 @@ final readonly class TodoListProvider implements ProviderInterface
     }
 
     /**
-     * @throws InvalidAggregateStringProvidedException
+     * @param array<string, non-empty-string> $uriVariables
+     *
      * @throws MissingDataException
-     * @throws InvalidUuidStringProvidedException
-     * @throws DateTimeException
      * @throws TooManyResultsException
      * @throws CouldNotFindReadModelException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function provide(
         Operation $operation,
@@ -41,7 +39,6 @@ final readonly class TodoListProvider implements ProviderInterface
     ): TodoList {
         if (
             !array_key_exists('id', $uriVariables)
-            || !is_string($uriVariables['id'])
         ) {
             throw MissingDataException::withKeyAndType(
                 missingKey: 'id',
@@ -50,7 +47,7 @@ final readonly class TodoListProvider implements ProviderInterface
             );
         }
 
-        $aggregateRootId = AggregateRootId::fromString(uuid: $uriVariables['id']);
+        $aggregateRootId = AggregateRootId::fromString(value: $uriVariables['id']);
         $detailViewReadModel = $this->repository->find(id: (string) $aggregateRootId);
 
         if (!$detailViewReadModel instanceof DetailView) {

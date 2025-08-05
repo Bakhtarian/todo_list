@@ -10,6 +10,9 @@ use App\Domain\Shared\ValueObject\DateTime;
  */
 interface MessageInterface
 {
+    /**
+     * @return non-empty-string
+     */
     public function getId(): string;
 
     public function getPlayhead(): int;

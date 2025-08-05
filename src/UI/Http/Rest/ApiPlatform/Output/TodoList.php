@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\UI\Http\Rest\ApiPlatform\Output;
 
 use ApiPlatform\Metadata\ApiProperty;
-use App\Infrastructure\TodoList\Persistence\Read\Overview\DetailView;
+use App\Infrastructure\TodoList\Persistence\Read\DetailView\DetailView;
 
 final readonly class TodoList
 {
@@ -77,9 +77,9 @@ final readonly class TodoList
     {
         return new self(
             id: $detailView->id,
-            title: $detailView->title,
+            title: $detailView->title->toString(),
             createdAt: $detailView->createdAt->toString(),
-            description: $detailView->description,
+            description: $detailView->description?->toString(),
             deadline: $detailView->deadline?->toString(),
             isFinished: $detailView->finished,
         );

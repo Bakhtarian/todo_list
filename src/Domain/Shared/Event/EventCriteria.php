@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domain\Shared\Event;
 
-use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
-use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
 
+/**
+ * @template-implements EventCriteriaInterface<EventCriteria>
+ */
 final class EventCriteria implements EventCriteriaInterface
 {
     /**
@@ -88,29 +90,30 @@ final class EventCriteria implements EventCriteriaInterface
     }
 
     /**
-     * @throws InvalidAggregateStringProvidedException
-     * @throws InvalidUuidStringProvidedException
+     * @phpstan-param non-empty-string $aggregateRootIds
+     *
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function withAggregateRootIdString(string ...$aggregateRootIds): self
     {
         return $this->withAggregateRootId(
             ...array_map(
-                fn (string $aggregateRootId): AggregateRootId => AggregateRootId::fromString($aggregateRootId),
+                fn (string $aggregateRootId): AggregateRootId => AggregateRootId::fromString(value: $aggregateRootId),
                 $aggregateRootIds
             )
         );
     }
 
     /**
-     * @throws InvalidAggregateStringProvidedException
-     * @throws InvalidUuidStringProvidedException
+     * @phpstan-param non-empty-string $aggregateRootIds
+     *
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function withAggregateRootIdStringToIgnore(string ...$aggregateRootIds): self
     {
-
         return $this->withAggregateRootIdToIgnore(
             ...array_map(
-                fn (string $aggregateRootId): AggregateRootId => AggregateRootId::fromString($aggregateRootId),
+                fn (string $aggregateRootId): AggregateRootId => AggregateRootId::fromString(value: $aggregateRootId),
                 $aggregateRootIds
             )
         );

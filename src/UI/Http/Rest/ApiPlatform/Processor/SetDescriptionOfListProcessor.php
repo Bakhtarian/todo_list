@@ -6,9 +6,17 @@ namespace App\UI\Http\Rest\ApiPlatform\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Application\TodoList\Command\SetDescriptionToTodoListCommand;
+use App\Application\TodoList\Command\AddDescriptionToTodoListCommand;
+use App\Application\TodoList\Command\AdjustDescriptionOfTodoListCommand;
+use App\Application\TodoList\Command\RemoveDescriptionFromTodoListCommand;
+use App\Application\TodoList\Query\FindTodoListDescriptionQuery;
 use App\Domain\Shared\Command\CommandBusInterface;
+use App\Domain\Shared\Command\CommandInterface;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
+use App\Domain\Shared\Query\QueryBusInterface;
 use App\Domain\Shared\ValueObject\AggregateRootId;
+use App\Domain\TodoList\ValueObject\Description;
+use App\UI\Http\Rest\ApiPlatform\Exception\CommandNotInitiatedException;
 use App\UI\Http\Rest\ApiPlatform\Exception\MissingDataException;
 use App\UI\Http\Rest\ApiPlatform\Input\SetDescriptionForListInput;
 use App\UI\Http\Rest\ApiPlatform\Output\TodoListIdentifier;
@@ -20,16 +28,22 @@ use App\UI\Http\Rest\ApiPlatform\Output\TodoListIdentifier;
  */
 final readonly class SetDescriptionOfListProcessor implements ProcessorInterface
 {
+    /**
+     * @phpstan-param QueryBusInterface<FindTodoListDescriptionQuery, Description|null> $queryBus
+     */
     public function __construct(
         private CommandBusInterface $commandBus,
+        private QueryBusInterface $queryBus,
     ) {
     }
 
     /**
      * @phpstan-param T $data
-     * @phpstan-param array<string, string> $uriVariables
+     * @phpstan-param array<string, non-empty-string> $uriVariables
      *
      * @throws MissingDataException
+     * @throws ValueObjectDidNotMeetValidationException
+     * @throws CommandNotInitiatedException
      */
     public function process(
         mixed $data,
@@ -45,13 +59,50 @@ final readonly class SetDescriptionOfListProcessor implements ProcessorInterface
             );
         }
 
-        $this->commandBus->dispatch(
-            command: new SetDescriptionToTodoListCommand(
-                id: $uriVariables['id'],
-                description: $data->description,
-            )
-        );
+        $aggregateRootId = AggregateRootId::fromString(value: $uriVariables['id']);
+        $listDescription = $this->queryBus->ask(new FindTodoListDescriptionQuery(aggregateRootId: $aggregateRootId));
+        $command = null;
 
-        return TodoListIdentifier::create(aggregateRootId: AggregateRootId::fromString(uuid: $uriVariables['id']));
+        if (empty($data->description) && null === $listDescription) {
+            return TodoListIdentifier::create(aggregateRootId: $aggregateRootId);
+        }
+
+        if (
+            null === $listDescription
+            && !empty($data->description)
+        ) {
+            $command = new AddDescriptionToTodoListCommand(
+                aggregateRootId: $aggregateRootId,
+                description: Description::fromString(value: $data->description),
+            );
+        }
+
+        if (
+            null === $data->description
+            && $listDescription instanceof Description
+        ) {
+            $command = new RemoveDescriptionFromTodoListCommand(aggregateRootId: $aggregateRootId);
+        }
+
+        if (
+            !empty($data->description)
+            && $listDescription instanceof Description
+        ) {
+            $command = new AdjustDescriptionOfTodoListCommand(
+                aggregateRootId: $aggregateRootId,
+                description: Description::fromString(value: $data->description),
+            );
+        }
+
+        if (!$command instanceof CommandInterface) {
+            throw CommandNotInitiatedException::withData(
+                listDescription: $listDescription?->toString(),
+                dataDescription: $data->description,
+            );
+        }
+
+        $this->commandBus->dispatch(command: $command);
+
+        return TodoListIdentifier::create(aggregateRootId: $aggregateRootId);
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\TodoList\Replay;
 
 use App\Domain\Shared\Event\EventBusInterface;
-use App\Domain\Shared\Persistence\Write\EventStoreInterface;
 use App\Domain\Shared\Replay\Replay;
 use App\Domain\TodoList\Event\TodoListEventStoreInterface;
 use App\Domain\TodoList\TodoList;

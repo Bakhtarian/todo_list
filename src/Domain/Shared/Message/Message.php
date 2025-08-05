@@ -6,8 +6,7 @@ namespace App\Domain\Shared\Message;
 
 use App\Domain\Shared\Event\EventInterface;
 use App\Domain\Shared\Exception\DateTimeException;
-use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
-use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
 use App\Domain\Shared\ValueObject\DateTime;
 
@@ -63,9 +62,8 @@ final readonly class Message implements MessageInterface
     /**
      * @param array<string, mixed> $metaData
      *
-     * @throws InvalidAggregateStringProvidedException
-     * @throws InvalidUuidStringProvidedException
      * @throws DateTimeException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public static function recordNow(
         \Stringable $aggregateId,
@@ -73,10 +71,14 @@ final readonly class Message implements MessageInterface
         array $metaData,
         EventInterface $payload,
     ): self {
+        $aggregateRootId = (string) $aggregateId;
+
+        assert(!empty($aggregateRootId));
+
         return new self(
             aggregateRootId: $aggregateId instanceof AggregateRootId
                 ? $aggregateId
-                : AggregateRootId::fromString(uuid: (string) $aggregateId),
+                : AggregateRootId::fromString(value: $aggregateRootId),
             playhead: $playhead,
             metaData: $metaData,
             payload: $payload,

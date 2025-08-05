@@ -3,7 +3,6 @@
 namespace App\Domain\Shared\Persistence\Write;
 
 use App\Domain\Shared\Aggregate\AggregateRootInterface;
-use App\Domain\Shared\Event\EventCriteriaInterface;
 use App\Domain\Shared\Event\EventInterface;
 use App\Domain\Shared\Exception\CouldNotFindEventStreamException;
 use App\Domain\Shared\Exception\DateTimeException;

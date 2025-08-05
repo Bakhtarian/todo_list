@@ -36,7 +36,7 @@ final class AggregateTest extends WebTestCase
 
         $this->commandBus->dispatch(
             command: new CreateTodoListWithTitleCommand(
-                id: $aggregateRootId,
+                aggregateRootId: $aggregateRootId,
                 title: 'Test',
             )
         );

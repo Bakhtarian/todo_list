@@ -6,7 +6,7 @@ namespace App\Infrastructure\TodoList\Persistence;
 
 use App\Domain\Shared\Persistence\AbstractEventSourcedRepository;
 use App\Domain\TodoList\Event\TodoListEventStoreInterface;
-use App\Domain\TodoList\Repository\TodoListRepositoryInterface;
+use App\Domain\TodoList\Persistence\TodoListRepositoryInterface;
 use App\Domain\TodoList\TodoList;
 use App\Infrastructure\Shared\Bus\EventBus;
 

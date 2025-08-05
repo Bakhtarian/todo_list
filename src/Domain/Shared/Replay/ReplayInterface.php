@@ -3,8 +3,6 @@
 namespace App\Domain\Shared\Replay;
 
 use App\Domain\Shared\Event\EventCriteriaInterface;
-use App\Domain\Shared\Event\EventInterface;
-use App\Domain\Shared\Message\MessageInterface;
 
 interface ReplayInterface
 {
