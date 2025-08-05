@@ -3,14 +3,17 @@
 namespace App\Domain\Shared\Aggregate;
 
 use App\Domain\Shared\Event\EventInterface;
+use App\Domain\Shared\Exception\BusinessRuleValidationException;
 use App\Domain\Shared\Exception\DateTimeException;
 use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
 use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
 use App\Domain\Shared\Exception\MissingMethodToApplyEventException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\Message\Message;
 use App\Domain\Shared\Message\MessageInterface;
 use App\Domain\Shared\Message\MessageStream;
 use App\Domain\Shared\Message\MessageStreamInterface;
+use App\Domain\Shared\Specification\Rule\BusinessRuleSpecificationInterface;
 
 trait AggregateRootBehaviourTrait
 {
@@ -24,10 +27,9 @@ trait AggregateRootBehaviourTrait
     private int $playhead = -1;
 
     /**
-     * @throws InvalidAggregateStringProvidedException
      * @throws MissingMethodToApplyEventException
-     * @throws InvalidUuidStringProvidedException
      * @throws DateTimeException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function apply(
         EventInterface $event,
@@ -88,5 +90,17 @@ trait AggregateRootBehaviourTrait
     public function getUncommittedMessages(): MessageStreamInterface
     {
         return new MessageStream(messages: $this->uncommittedEvents);
+    }
+
+    /**
+     * @throws BusinessRuleValidationException
+     */
+    protected static function checkRule(BusinessRuleSpecificationInterface $businessRuleSpecification): void
+    {
+        if ($businessRuleSpecification->isSatisfiedBy()->isTrue()) {
+            return;
+        }
+
+        throw new BusinessRuleValidationException(businessRuleSpecification: $businessRuleSpecification);
     }
 }
