@@ -6,14 +6,20 @@ namespace App\Domain\TodoList;
 
 use App\Domain\Shared\Aggregate\AggregateRootBehaviourTrait;
 use App\Domain\Shared\Aggregate\AggregateRootInterface;
+use App\Domain\Shared\Exception\BusinessRuleValidationException;
 use App\Domain\Shared\Exception\DateTimeException;
-use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
-use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
 use App\Domain\Shared\Exception\MissingMethodToApplyEventException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\ValueObject\AggregateRootId;
 use App\Domain\Shared\ValueObject\DateTime;
-use App\Domain\TodoList\Event\DescriptionWasSet;
+use App\Domain\TodoList\Event\DescriptionForToDoListWasAdded;
+use App\Domain\TodoList\Event\DescriptionForTodoListWasAdjusted;
+use App\Domain\TodoList\Event\DescriptionForTodoListWasRemoved;
 use App\Domain\TodoList\Event\TodoListWithTitleWasCreated;
+use App\Domain\TodoList\Specification\Checker\TitleUniquenessCheckerInterface;
+use App\Domain\TodoList\Specification\TitleMustBeUniqueRule;
+use App\Domain\TodoList\ValueObject\Description;
+use App\Domain\TodoList\ValueObject\Title;
 
 final class TodoList implements AggregateRootInterface
 {
@@ -24,12 +30,12 @@ final class TodoList implements AggregateRootInterface
         set => $value;
     }
 
-    private(set) string $title {
+    private(set) Title $title {
         get => $this->title;
         set => $value;
     }
 
-    private(set) ?string $description {
+    private(set) ?Description $description {
         get => $this->description;
         set => $value;
     }
@@ -49,20 +55,33 @@ final class TodoList implements AggregateRootInterface
         set => $value;
     }
 
+    private(set) DateTime $updatedAt {
+        get => $this->updatedAt;
+        set => $value;
+    }
+
     /**
-     * @param non-falsy-string $title
-     *
-     * @throws InvalidAggregateStringProvidedException
      * @throws MissingMethodToApplyEventException
-     * @throws InvalidUuidStringProvidedException
      * @throws DateTimeException
+     * @throws ValueObjectDidNotMeetValidationException
+     * @throws BusinessRuleValidationException
      */
-    public static function createWithTitle(AggregateRootId $id, string $title): self
-    {
+    public static function createWithTitle(
+        AggregateRootId $id,
+        Title $title,
+        TitleUniquenessCheckerInterface $titleUniquenessChecker,
+    ): self {
+        self::checkRule(
+            businessRuleSpecification: new TitleMustBeUniqueRule(
+                titleUniquenessChecker: $titleUniquenessChecker,
+                title: $title,
+            )
+        );
+
         $todoList = new self();
         $todoList->apply(
             event: new TodoListWithTitleWasCreated(
-                id: $id,
+                aggregateRootId: $id,
                 title: $title,
                 createdAt: DateTime::now(),
             )
@@ -72,32 +91,76 @@ final class TodoList implements AggregateRootInterface
     }
 
     /**
-     * @throws InvalidAggregateStringProvidedException
      * @throws MissingMethodToApplyEventException
-     * @throws InvalidUuidStringProvidedException
      * @throws DateTimeException
+     * @throws ValueObjectDidNotMeetValidationException
      */
-    public function setDescription(?string $description): void
+    public function addDescription(Description $description): void
     {
         $this->apply(
-            event: new DescriptionWasSet(
-                id: $this->aggregateRootId,
-                description: $description
+            event: new DescriptionForToDoListWasAdded(
+                aggregateRootId: $this->aggregateRootId,
+                description: $description,
+                updatedAt: DateTime::now(),
             ),
+        );
+    }
+
+    /**
+     * @throws DateTimeException
+     * @throws MissingMethodToApplyEventException
+     * @throws ValueObjectDidNotMeetValidationException
+     */
+    public function removeDescription(): void
+    {
+        $this->apply(
+            event: new DescriptionForTodoListWasRemoved(
+                aggregateRootId: $this->aggregateRootId,
+                updatedAt: DateTime::now(),
+            )
+        );
+    }
+
+    /**
+     * @throws DateTimeException
+     * @throws MissingMethodToApplyEventException
+     * @throws ValueObjectDidNotMeetValidationException
+     */
+    public function adjustDescription(Description $description): void
+    {
+        $this->apply(
+            event: new DescriptionForTodoListWasAdjusted(
+                aggregateRootId: $this->aggregateRootId,
+                description: $description,
+                updatedAt: DateTime::now(),
+            )
         );
     }
 
     public function applyTodoListWithTitleWasCreated(TodoListWithTitleWasCreated $event): void
     {
-        $this->aggregateRootId = $event->id;
+        $this->aggregateRootId = $event->aggregateRootId;
         $this->title = $event->title;
         $this->createdAt = $event->createdAt;
         $this->isFinished = false;
     }
 
-    public function applyDescriptionWasSet(DescriptionWasSet $event): void
+    public function applyDescriptionWasAdded(DescriptionForToDoListWasAdded $event): void
     {
         $this->description = $event->description;
+        $this->updatedAt = $event->updatedAt;
+    }
+
+    public function applyDescriptionForTodoListWasRemoved(DescriptionForTodoListWasRemoved $event): void
+    {
+        $this->description = null;
+        $this->updatedAt = $event->updatedAt;
+    }
+
+    public function applyDescriptionForTodoListWasAdjusted(DescriptionForTodoListWasAdjusted $event): void
+    {
+        $this->description = $event->description;
+        $this->updatedAt = $event->updatedAt;
     }
 
     public function getAggregateRootId(): \Stringable
