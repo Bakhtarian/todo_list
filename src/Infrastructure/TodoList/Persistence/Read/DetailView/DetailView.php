@@ -2,18 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\TodoList\Persistence\Read\Overview;
+namespace App\Infrastructure\TodoList\Persistence\Read\DetailView;
 
 use App\Domain\Shared\Exception\DateTimeException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\Persistence\Read\SerializableReadModelInterface;
 use App\Domain\Shared\ValueObject\DateTime;
+use App\Domain\TodoList\ValueObject\Description;
+use App\Domain\TodoList\ValueObject\Title;
 
 /**
  * @phpstan-type detailViewData array{
  *      uuid: string,
- *      title: string,
+ *      title: non-empty-string,
  *      createdAt: string,
- *      description: string|null,
+ *      description: non-empty-string|null,
  *      deadline: string|null,
  *      finished: bool,
  *  }
@@ -27,7 +30,7 @@ final class DetailView implements SerializableReadModelInterface
             set => $value;
             get => $this->id;
         },
-        private(set) string $title {
+        private(set) Title $title {
             set => $value;
             get => $this->title;
         },
@@ -35,7 +38,7 @@ final class DetailView implements SerializableReadModelInterface
             set => $value;
             get => $this->createdAt;
         },
-        private(set) ?string $description = null {
+        private(set) ?Description $description = null {
             set => $value;
             get => $this->description;
         },
@@ -50,7 +53,21 @@ final class DetailView implements SerializableReadModelInterface
     ) {
     }
 
-    public function setDescription(?string $description): self
+    public function addDescription(Description $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function removeDescription(): self
+    {
+        $this->description = null;
+
+        return $this;
+    }
+
+    public function adjustDescription(Description $description): self
     {
         $this->description = $description;
 
@@ -64,26 +81,27 @@ final class DetailView implements SerializableReadModelInterface
     {
         return [
             'uuid' => $this->getId(),
-            'title' => $this->title,
+            'title' => $this->title->toString(),
             'createdAt' => $this->createdAt->toString(),
-            'description' => $this->description,
+            'description' => $this->description?->toString(),
             'deadline' => $this->deadline?->toString(),
             'finished' => $this->finished,
         ];
     }
 
     /**
-     * @param detailViewData $data
+     * @phpstan-param detailViewData $data
      *
      * @throws DateTimeException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public static function deserialize(array $data): DetailView
     {
         return new self(
             id: $data['uuid'],
-            title: $data['title'],
+            title: Title::fromString(value: $data['title']),
             createdAt: DateTime::fromString(dateTime: $data['createdAt']),
-            description: $data['description'] ?? null,
+            description: Description::tryFromString(value: $data['description']),
             deadline: DateTime::tryFromString(dateTime: $data['deadline'] ?? null),
             finished: $data['finished'],
         );

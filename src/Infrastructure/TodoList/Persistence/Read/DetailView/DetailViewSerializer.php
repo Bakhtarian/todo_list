@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\TodoList\Persistence\Read\Overview;
+namespace App\Infrastructure\TodoList\Persistence\Read\DetailView;
 
 use App\Domain\Shared\Exception\DateTimeException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
 use App\Domain\Shared\IdentifiableInterface;
 use App\Domain\Shared\SerializerInterface;
 
@@ -24,6 +25,7 @@ final readonly class DetailViewSerializer implements SerializerInterface
      * @param detailViewData $data
      *
      * @throws DateTimeException
+     * @throws ValueObjectDidNotMeetValidationException
      */
     public function deserialize(array $data): DetailView
     {
