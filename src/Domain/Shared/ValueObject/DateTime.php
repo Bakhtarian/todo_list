@@ -147,11 +147,17 @@ final class DateTime extends \DateTimeImmutable implements \Stringable
         );
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function __toString(): string
     {
         return $this->format(format: DateTime::FORMAT);
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function toString(): string
     {
         return (string) $this;

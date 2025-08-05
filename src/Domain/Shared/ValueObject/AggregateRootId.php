@@ -6,54 +6,70 @@ namespace App\Domain\Shared\ValueObject;
 
 use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
 use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
+use App\Domain\Shared\ValueObject\Base\BaseString;
 use Symfony\Component\Uid\TimeBasedUidInterface;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class AggregateRootId implements \Stringable
+/**
+ * @template-extends BaseString<AggregateRootId>
+ */
+final readonly class AggregateRootId extends BaseString
 {
-    private function __construct(public TimeBasedUidInterface $uuid)
+    private function __construct(string $value)
     {
-    }
-
-    public static function create(): self
-    {
-        return new self(Uuid::v7());
+        parent::__construct(value: $value);
     }
 
     /**
-     * @throws InvalidUuidStringProvidedException
-     * @throws InvalidAggregateStringProvidedException
+     * @throws ValueObjectDidNotMeetValidationException
      */
-    public static function fromString(string $uuid): self
+    public static function fromString(string $value): self
     {
-        if (!Uuid::isValid(uuid: $uuid)) {
-            throw InvalidUuidStringProvidedException::withString(uuid: $uuid);
+        return new self(value: $value);
+    }
+
+    public static function tryFromString(?string $value): ?AggregateRootId
+    {
+        if (null === $value) {
+            return null;
         }
 
-        $aggregate = Uuid::fromString(uuid: $uuid);
+        try {
+            return self::fromString(value: $value);
+        } catch (ValueObjectDidNotMeetValidationException) {
+            return null;
+        }
+    }
 
-        if (!$aggregate instanceof TimeBasedUidInterface) {
-            throw InvalidAggregateStringProvidedException::withAggregateString(aggregate: $uuid);
+    /**
+     * @throws ValueObjectDidNotMeetValidationException
+     */
+    public static function create(?string $value = null): self
+    {
+        if (null !== $value) {
+            return self::fromString(value: $value);
         }
 
-        return new self(uuid: $aggregate);
+        $uuid = Uuid::v7();
+
+        return new self(value: $uuid->toString());
     }
 
-    /**
-     * @return non-empty-string
-     */
-    public function __toString(): string
+    protected function validate(string $value): void
     {
-        assert($this->uuid instanceof Uuid);
+        try {
+            if (!Uuid::isValid(uuid: $value)) {
+                throw InvalidUuidStringProvidedException::withString(uuid: $value);
+            }
 
-        return $this->uuid->toString();
-    }
+            $aggregate = Uuid::fromString(uuid: $value);
 
-    /**
-     * @return non-empty-string
-     */
-    public function toString(): string
-    {
-        return (string) $this;
+            if (!$aggregate instanceof TimeBasedUidInterface) {
+                throw InvalidAggregateStringProvidedException::withAggregateString(aggregate: $value);
+            }
+        } catch (InvalidUuidStringProvidedException | InvalidAggregateStringProvidedException $e) {
+            throw ValueObjectDidNotMeetValidationException::withMessage(message: $e->getMessage());
+        }
     }
 }
