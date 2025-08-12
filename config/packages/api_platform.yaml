@@ -32,5 +32,3 @@ api_platform:
         hydra_prefix: true
     doctrine:
         enabled: true
-#    doctrine_mongodb_odm:
-#        enabled: false
