@@ -2,6 +2,7 @@
 
 namespace App\Domain\Shared\Persistence;
 
+use App\Domain\Shared\Exception\CouldNotSaveReadModelException;
 use App\Domain\Shared\Exception\TooManyResultsException;
 use App\Domain\Shared\IdentifiableInterface;
 
@@ -12,6 +13,8 @@ interface ReadModelRepositoryInterface
 {
     /**
      * @phpstan-param T $identifiableModel
+     *
+     * @throws CouldNotSaveReadModelException
      */
     public function save(IdentifiableInterface $identifiableModel): void;
 

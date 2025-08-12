@@ -1,3 +1,6 @@
+imports:
+    - { resource: 'services/' }
+
 services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
@@ -9,15 +12,15 @@ services:
     _instanceof:
         App\Domain\Shared\Command\CommandHandlerInterface:
             tags:
-                - { name: messenger.message_handler, bus: command.bus, method: handle }
+                - { name: messenger.message_handler, bus: command.bus }
 
         App\Domain\Shared\Event\EventHandlerInterface:
             tags:
-                - { name: messenger.message_handler, bus: event.bus, method: handle }
+                - { name: messenger.message_handler, bus: event.bus }
 
         App\Domain\Shared\Projector\ProjectorInterface:
             tags:
-                - { name: messenger.message_handler, bus: event.bus, method: handle }
+                - { name: messenger.message_handler, bus: event.bus }
 
         App\Domain\Shared\Query\QueryHandlerInterface:
             tags:

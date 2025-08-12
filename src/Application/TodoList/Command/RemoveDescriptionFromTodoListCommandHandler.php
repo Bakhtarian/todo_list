@@ -5,24 +5,37 @@ declare(strict_types=1);
 namespace App\Application\TodoList\Command;
 
 use App\Domain\Shared\Command\CommandHandlerInterface;
-use App\Domain\Shared\Command\CommandInterface;
-use App\Domain\TodoList\Persistence\TodoListRepositoryInterface;
+use App\Domain\Shared\Exception\CouldNotFindEventStreamException;
+use App\Domain\Shared\Exception\DateTimeException;
+use App\Domain\Shared\Exception\InvalidAggregateStringProvidedException;
+use App\Domain\Shared\Exception\InvalidUuidStringProvidedException;
+use App\Domain\Shared\Exception\MissingMethodToApplyEventException;
+use App\Domain\Shared\Exception\ValueObjectDidNotMeetValidationException;
+use App\Domain\Shared\Persistence\EventSourcedRepositoryInterface;
+use App\Domain\TodoList\TodoList;
 
 final readonly class RemoveDescriptionFromTodoListCommandHandler implements CommandHandlerInterface
 {
-    public function __construct(private TodoListRepositoryInterface $repository)
+    /**
+     * @param EventSourcedRepositoryInterface<TodoList> $todoListRepository
+     */
+    public function __construct(private EventSourcedRepositoryInterface $todoListRepository)
     {
     }
 
-    public function handle(CommandInterface $command): void
+    /**
+     * @throws InvalidAggregateStringProvidedException
+     * @throws CouldNotFindEventStreamException
+     * @throws MissingMethodToApplyEventException
+     * @throws ValueObjectDidNotMeetValidationException
+     * @throws InvalidUuidStringProvidedException
+     * @throws DateTimeException
+     */
+    public function __invoke(RemoveDescriptionFromTodoListCommand $command): void
     {
-        if (!$command instanceof RemoveDescriptionFromTodoListCommand) {
-            return;
-        }
-
-        $list = $this->repository->load(aggregateRootId: $command->aggregateRootId);
+        $list = $this->todoListRepository->load(aggregateRootId: $command->aggregateRootId);
         $list->removeDescription();
 
-        $this->repository->save(aggregateRoot: $list);
+        $this->todoListRepository->save(aggregateRoot: $list);
     }
 }

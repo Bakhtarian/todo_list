@@ -126,7 +126,7 @@ SQL;
      * @throws InvalidAggregateStringProvidedException
      * @throws InvalidUuidStringProvidedException
      */
-    public function loadAll(): array
+    public function loadAllMessages(): array
     {
         $sql = <<<SQL
 select * from %s

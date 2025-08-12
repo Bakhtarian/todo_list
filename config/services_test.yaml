@@ -1,0 +1,21 @@
+services:
+    test.overview_read_model_repository:
+        class: App\Tests\Todo\Util\InMemoryOverviewRepository
+        public: true
+
+    test.detail_view_read_model_repository:
+        class: App\Tests\Todo\Util\InMemoryDetailViewRepository
+        public: true
+
+    App\Infrastructure\TodoList\Persistence\Read\Overview\OverviewRepository:
+        alias: test.overview_read_model_repository
+        public: true
+    App\Infrastructure\TodoList\Persistence\Read\DetailView\DetailViewRepository:
+        alias: test.detail_view_read_model_repository
+        public: true
+
+    messenger.middleware.handle_message:
+        abstract: true
+        class: Symfony\Component\Messenger\Middleware\HandleMessageMiddleware
+        arguments:
+            $handlersLocator: '@messenger.handler_locator'

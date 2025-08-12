@@ -1,0 +1,6 @@
+services:
+    App\Infrastructure\TodoList\Persistence\Read\Overview\OverviewRepository: ~
+    App\Infrastructure\TodoList\Persistence\Read\DetailView\DetailViewRepository: ~
+
+    App\Domain\Shared\Persistence\ReadModelRepositoryInterface $overviewRepository: '@App\Infrastructure\TodoList\Persistence\Read\Overview\OverviewRepository'
+    App\Domain\Shared\Persistence\ReadModelRepositoryInterface $detailViewRepository: '@App\Infrastructure\TodoList\Persistence\Read\DetailView\DetailViewRepository'

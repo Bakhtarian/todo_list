@@ -8,19 +8,23 @@ use App\Domain\Shared\Exception\CouldNotFindReadModelException;
 use App\Domain\Shared\Exception\CouldNotSaveReadModelException;
 use App\Domain\Shared\Exception\TooManyResultsException;
 use App\Domain\Shared\Persistence\Read\AbstractReadModelProjector;
+use App\Domain\Shared\Persistence\ReadModelRepositoryInterface;
 use App\Domain\TodoList\Event\DescriptionForToDoListWasAdded;
 use App\Domain\TodoList\Event\DescriptionForTodoListWasAdjusted;
 use App\Domain\TodoList\Event\DescriptionForTodoListWasRemoved;
 use App\Domain\TodoList\Event\TodoListWithTitleWasCreated;
 
 /**
- * @template-extends AbstractReadModelProjector<DetailView, DetailViewRepository>
+ * @template-extends AbstractReadModelProjector<DetailView>
  */
 final readonly class DetailViewProjector extends AbstractReadModelProjector
 {
-    public function __construct(DetailViewRepository $repository)
+    /**
+     * @param ReadModelRepositoryInterface<DetailView> $detailViewRepository
+     */
+    public function __construct(ReadModelRepositoryInterface $detailViewRepository)
     {
-        parent::__construct(repository: $repository);
+        parent::__construct(repository: $detailViewRepository);
     }
 
     /**

@@ -37,7 +37,7 @@ abstract class Replay implements ReplayInterface
 
     public function replay(): void
     {
-        $messagesToReplay = $this->eventStore->loadAll();
+        $messagesToReplay = $this->eventStore->loadAllMessages();
 
         if ($this->criteria !== null) {
             foreach ($messagesToReplay as $index => $message) {

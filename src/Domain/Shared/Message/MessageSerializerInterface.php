@@ -14,7 +14,7 @@ interface MessageSerializerInterface
     /**
      * @phpstan-param T $message
      *
-     * @return messageSerializerData
+     * @phpstan-return messageSerializerData
      */
     public function serialize(MessageInterface $message): array;
 

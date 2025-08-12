@@ -35,11 +35,13 @@ interface EventStoreInterface
 
     /**
      * @phpstan-return T
+     *
+     * @throws CouldNotFindEventStreamException
      */
     public function loadFromPlayhead(\Stringable $aggregateRootId, int $playhead): AggregateRootInterface;
 
     /**
      * @return MessageInterface<EventInterface>[]
      */
-    public function loadAll(): array;
+    public function loadAllMessages(): array;
 }

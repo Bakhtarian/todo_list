@@ -145,7 +145,7 @@ final class TodoList implements AggregateRootInterface
         $this->isFinished = false;
     }
 
-    public function applyDescriptionWasAdded(DescriptionForToDoListWasAdded $event): void
+    public function applyDescriptionForToDoListWasAdded(DescriptionForToDoListWasAdded $event): void
     {
         $this->description = $event->description;
         $this->updatedAt = $event->updatedAt;

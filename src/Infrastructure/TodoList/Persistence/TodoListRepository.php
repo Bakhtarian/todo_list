@@ -5,22 +5,26 @@ declare(strict_types=1);
 namespace App\Infrastructure\TodoList\Persistence;
 
 use App\Domain\Shared\Persistence\AbstractEventSourcedRepository;
-use App\Domain\TodoList\Event\TodoListEventStoreInterface;
-use App\Domain\TodoList\Persistence\TodoListRepositoryInterface;
+use App\Domain\Shared\Persistence\Write\EventStoreInterface;
 use App\Domain\TodoList\TodoList;
 use App\Infrastructure\Shared\Bus\EventBus;
 
 /**
- * @template-extends AbstractEventSourcedRepository<TodoList>
+ * @template T of TodoList
+ *
+ * @template-extends AbstractEventSourcedRepository<T>
  */
-final readonly class TodoListRepository extends AbstractEventSourcedRepository implements TodoListRepositoryInterface
+final readonly class TodoListRepository extends AbstractEventSourcedRepository
 {
+    /**
+     * @param EventStoreInterface<T> $todoListEventStore
+     */
     public function __construct(
-        TodoListEventStoreInterface $eventStore,
+        EventStoreInterface $todoListEventStore,
         EventBus $eventBus,
     ) {
         parent::__construct(
-            eventStore: $eventStore,
+            eventStore: $todoListEventStore,
             eventBus: $eventBus,
         );
     }

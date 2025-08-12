@@ -31,9 +31,6 @@ abstract readonly class AbstractMongoDBReadModelRepository implements ReadModelR
     ) {
     }
 
-    /**
-     * @throws CouldNotSaveReadModelException
-     */
     public function save(IdentifiableInterface $identifiableModel): void
     {
         $maxTryCount = $this->maxRetryCount;

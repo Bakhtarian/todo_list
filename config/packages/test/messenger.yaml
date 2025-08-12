@@ -1,0 +1,26 @@
+framework:
+    messenger:
+        default_bus: command.bus
+
+        buses:
+            command.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+            query.bus: ~
+            event.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+            projector.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+
+        transports:
+            sync: 'sync://'
+
+        routing:
+            App\Domain\Shared\Query\QueryInterface: sync
+            App\Domain\Shared\Event\EventInterface: sync
+            App\Domain\Shared\Command\CommandInterface: sync

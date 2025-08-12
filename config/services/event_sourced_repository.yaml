@@ -1,0 +1,4 @@
+services:
+    App\Infrastructure\TodoList\Persistence\TodoListRepository: ~
+
+    App\Infrastructure\TodoList\Persistence\EventSourcedRepositoryInterface $todoListRepository: '@App\Infrastructure\TodoList\Persistence\TodoListRepository'

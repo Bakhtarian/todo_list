@@ -13,28 +13,25 @@ use App\Domain\Shared\Persistence\ReadModelRepositoryInterface;
 use App\Domain\Shared\Projector\ProjectorInterface;
 
 /**
- * @template I of IdentifiableInterface
- * @template T of ReadModelRepositoryInterface<I>
- *
- * @template-implements ProjectorInterface<EventInterface>
+ * @template T of IdentifiableInterface
  */
 abstract readonly class AbstractReadModelProjector implements ProjectorInterface
 {
+    /**
+     * @param ReadModelRepositoryInterface<T> $repository
+     */
     protected function __construct(
-        /**
-         * @var T
-         */
         protected ReadModelRepositoryInterface $repository,
     ) {
     }
 
     /**
-     * @return I
+     * @return T
      *
      * @throws TooManyResultsException
      * @throws CouldNotFindReadModelException
      */
-    protected function getReadModel(string $id)
+    protected function getReadModel(string $id): IdentifiableInterface
     {
         $readModel = $this->repository->find(id: $id);
 
@@ -48,7 +45,7 @@ abstract readonly class AbstractReadModelProjector implements ProjectorInterface
     /**
      * @throws MissingMethodToApplyEventException
      */
-    public function handle(EventInterface $message): void
+    public function __invoke(EventInterface $message): void
     {
         $eventToHandle = $message;
         $handleMethod = $this->getHandleMethod(event: $message);
